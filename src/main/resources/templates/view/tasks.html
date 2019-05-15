@@ -1,0 +1,136 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title th:text="${title}">Tasks</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/dataTables.jqueryui.min.css"/>
+</head>
+<body>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src=" https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Add task</h2>
+                <div class="alert alert-success" th:if="${successMessage}">
+                    <a class="close" data-dismiss="alert" arial-label="close" href="#">&times;</a>
+                    <strong th:text="${successMessage}"></strong>
+                </div>
+                <div class="alert alert-warning" th:if="${errorMessage}">
+                    <a class="close" data-dismiss="alert" arial-label="close" href="#">&times;</a>
+                    <strong th:text="${errorMessage}"></strong>
+                </div>
+                <form action="#" th:action="@{${isAdd}?'/save':'/update'}" th:object="${task}" method="post">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="description" placeholder="Description" th:field="*{description}">
+                    </div>
+                    <input type="hidden" class="form-control" th:field="*{id}">
+                    <button type="submit" class="btn btn-primary" th:text="${isAdd}?'Save' : 'Update'">Add</button>
+                </form>
+            </div>
+        </div>
+        <button onclick="upNdown('up');">&ShortUpArrow;</button>
+        <button onclick="upNdown('down');">&ShortDownArrow;</button>
+    </div>
+
+    <div class="col-md12">
+        <h2>ToDo List</h2>
+        <div style="margin-top: 10px;">
+            <table id="todolist" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="todo : ${tasks}">
+                        <td th:text="${todo.id}"></td>
+                        <td width="1400" th:text="${todo.description}"></td>
+                        <td><a th:href="@{'/getTask/' + ${todo.id}}"><i class="fa fa-edit" style="font-size: 20px;"></i></a>
+                            <a href="javascript:void(0)" class="confirm-delete" th:attr="data-id=${todo.id}, data-name=${todo.description}">
+                               <i class="fa fa-trash" style="font-size: 21px; color:red";></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $("#todolist").dataTable();
+        $(".confirm-delete").on('click', function(e){
+            e.preventDefault();
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            $("#modal-name").html(name);
+            $('#idModalLink').attr('href', '/deleteTask/' + id);
+            $('#taskModal').modal('show');
+        });
+    </script>
+
+    <script type="text/javascript">
+        var index;
+        function getSelectedRow()
+        {
+            var table = document.getElementById("todolist");
+            for(var i = 1; i < table.rows.length; i++)
+            {
+                table.rows[i].onclick = function()
+                {
+                    if(typeof index !== "undefined"){
+                        table.rows[index].classList.toggle("selected");
+                    }
+                    index = this.rowIndex;
+                    this.classList.toggle("selected");
+                };
+            }
+        }
+        getSelectedRow();
+
+        function upNdown(direction)
+        {
+            var rows = document.getElementById("todolist").rows,
+                parent = rows[index].parentNode;
+            if(direction === "up")
+            {
+                if(index > 1){
+                    parent.insertBefore(rows[index], rows[index - 1]);
+                    index--;
+                }
+            }
+
+            if(direction === "down")
+            {
+                if(index < rows.length -1){
+                    parent.insertBefore(rows[index + 1], rows[index]);
+                    index++;
+                }
+            }
+        }
+    </script>
+
+    <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body" id="myModalBody">
+                    <p>Do you want do delete this (<span id="modal-name"></span>) task?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="idModalLink" href="#" class="btn btn-primary">Yes</a>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

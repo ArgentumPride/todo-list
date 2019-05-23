@@ -28,7 +28,7 @@
                     <a class="close" data-dismiss="alert" arial-label="close" href="#">&times;</a>
                     <strong th:text="${errorMessage}"></strong>
                 </div>
-                <form action="#" th:action="@{${isAdd}?'/save':'/update'}" th:object="${task}" method="post">
+                <form action="#" th:action="${isAdd}?'/save':'/update'" th:object="${task}" method="post">
                     <div class="form-group">
                         <input type="text" class="form-control" id="description" placeholder="Description" th:field="*{description}">
                     </div>
@@ -37,8 +37,6 @@
                 </form>
             </div>
         </div>
-        <button onclick="upNdown('up');">&ShortUpArrow;</button>
-        <button onclick="upNdown('down');">&ShortDownArrow;</button>
     </div>
 
     <div class="col-md12">
@@ -55,10 +53,13 @@
                 <tbody>
                     <tr th:each="todo : ${tasks}">
                         <td th:text="${todo.id}"></td>
-                        <td width="1400" th:text="${todo.description}"></td>
+                        <td width="1000" th:text="${todo.description}"></td>
                         <td><a th:href="@{'/getTask/' + ${todo.id}}"><i class="fa fa-edit" style="font-size: 20px;"></i></a>
                             <a href="javascript:void(0)" class="confirm-delete" th:attr="data-id=${todo.id}, data-name=${todo.description}">
                                <i class="fa fa-trash" style="font-size: 21px; color:red";></i></a>
+                            <a th:href="@{'/update/' + ${todo.id} + '/' + ${todo.id - 1}}" class="move-element-up" th:attr="data-id=${todo.id}, data-name=${todo.description}">
+                                <i id="move-up">Move up</i>
+                            </a>
                         </td>
                     </tr>
                 </tbody>
@@ -67,7 +68,6 @@
     </div>
 
     <script type="text/javascript">
-        $("#todolist").dataTable();
         $(".confirm-delete").on('click', function(e){
             e.preventDefault();
             var id = $(this).data('id');
@@ -76,47 +76,6 @@
             $('#idModalLink').attr('href', '/deleteTask/' + id);
             $('#taskModal').modal('show');
         });
-    </script>
-
-    <script type="text/javascript">
-        var index;
-        function getSelectedRow()
-        {
-            var table = document.getElementById("todolist");
-            for(var i = 1; i < table.rows.length; i++)
-            {
-                table.rows[i].onclick = function()
-                {
-                    if(typeof index !== "undefined"){
-                        table.rows[index].classList.toggle("selected");
-                    }
-                    index = this.rowIndex;
-                    this.classList.toggle("selected");
-                };
-            }
-        }
-        getSelectedRow();
-
-        function upNdown(direction)
-        {
-            var rows = document.getElementById("todolist").rows,
-                parent = rows[index].parentNode;
-            if(direction === "up")
-            {
-                if(index > 1){
-                    parent.insertBefore(rows[index], rows[index - 1]);
-                    index--;
-                }
-            }
-
-            if(direction === "down")
-            {
-                if(index < rows.length -1){
-                    parent.insertBefore(rows[index + 1], rows[index]);
-                    index++;
-                }
-            }
-        }
     </script>
 
     <div class="modal fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
